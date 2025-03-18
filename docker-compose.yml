@@ -1,27 +1,90 @@
 version: '3.8'
 
 services:
-
   db:
+    image: mysql:5.7
     container_name: db
-    image: mysql:latest
     restart: always
     ports:
-      - "3306:3306" # MySQL uses port 3306
+      - '3306:3306' # MySQL uses port 3306
     environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: your_database_name # Replace with your desired database name
-      MYSQL_USER: your_mysql_user # Replace with your desired MySQL username
-      MYSQL_PASSWORD: your_mysql_password # Replace with your desired MySQL password
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p${DB_ROOT_PASSWORD}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
-    container_name: app
-    image: rimmelasghar/spring-boot-boilerplate:2.2.0
+    container_name: spring-boot-app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - '0.0.0.0:8081:8080'
+      - '35729:35729' # LiveReload port
     environment:
-      - "SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/your_database_name" # Replace 'your_database_name' with the same name you used for MYSQL_DATABASE in the db service.
-      - "SPRING_DATASOURCE_USERNAME=your_mysql_user" # Replace 'your_mysql_user' with the same name you used for MYSQL_USER in the db service.
-      - "SPRING_DATASOURCE_PASSWORD=your_mysql_password" # Replace 'your_mysql_password' with the same name you used for MYSQL_PASSWORD in the db service.
+      - 'SPRING_PROFILES_ACTIVE=dev'
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${MYSQL_DATABASE}'
+      - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
+      - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
+      - 'JWT_ISSUER=${JWT_ISSUER}'
+      - 'SWAGGER_CONTACT_MAIL=${SWAGGER_CONTACT_MAIL}'
+      - 'SWAGGER_CONTACT_URL=${SWAGGER_CONTACT_URL}'
+      - 'SWAGGER_APP_NAME=${SWAGGER_APP_NAME}'
+      - 'SWAGGER_APP_VERSION=${SWAGGER_APP_VERSION}'
+      - 'SWAGGER_APP_LICENSE_URL=${SWAGGER_APP_LICENSE_URL}'
+      - 'SWAGGER_APP_LICENSE=${SWAGGER_APP_LICENSE}'
+      - 'SPRING_DEVTOOLS_RESTART_ENABLED=true'
+      - 'SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true'
+      - 'SPRING_DEVTOOLS_RESTART_POLL_INTERVAL=2s'
+      - 'SPRING_DEVTOOLS_RESTART_QUIET_PERIOD=1s'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:8080/health || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: always
+    ports:
+      - '8082:8080'
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+      - ADMINER_DESIGN=pepa-linha
+      - ADMINER_PLUGINS=tables-filter tinymce
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+    driver: local

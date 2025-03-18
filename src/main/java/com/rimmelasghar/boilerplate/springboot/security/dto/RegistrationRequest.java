@@ -1,5 +1,6 @@
 package com.rimmelasghar.boilerplate.springboot.security.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,18 +14,19 @@ import javax.validation.constraints.NotEmpty;
 @Setter
 @ToString
 @NoArgsConstructor
+@Schema(description = "Request object for user registration")
 public class RegistrationRequest {
 
-	@NotEmpty(message = "{registration_name_not_empty}")
-	private String name;
-
+	@Schema(description = "User's email address", example = "user@example.com", required = true)
 	@Email(message = "{registration_email_is_not_valid}")
 	@NotEmpty(message = "{registration_email_not_empty}")
 	private String email;
 
+	@Schema(description = "User's username", example = "username", required = true)
 	@NotEmpty(message = "{registration_username_not_empty}")
 	private String username;
 
+	@Schema(description = "User's password", example = "password123", required = true)
 	@NotEmpty(message = "{registration_password_not_empty}")
 	private String password;
 

@@ -60,9 +60,11 @@ show_menu() {
     echo "3. Restart application"
     echo "4. View logs"
     echo "5. Rebuild and start application"
-    echo "6. Exit"
+    echo "6. Access app container shell"
+    echo "7. Rebuild app inside container"
+    echo "8. Exit"
     echo ""
-    read -p "Enter your choice (1-6): " choice
+    read -p "Enter your choice (1-8): " choice
     
     case $choice in
         1)
@@ -81,6 +83,12 @@ show_menu() {
             rebuild_application
             ;;
         6)
+            access_container_shell
+            ;;
+        7)
+            rebuild_inside_container
+            ;;
+        8)
             echo "Exiting..."
             exit 0
             ;;
@@ -162,6 +170,86 @@ rebuild_application() {
     show_menu
 }
 
+# Access the app container shell
+access_container_shell() {
+    echo "Accessing app container shell..."
+    
+    # Check if the app container is running
+    if ! $DOCKER_COMPOSE_CMD -f local-docker-compose.yml ps | grep -q "app.*Up"; then
+        echo "Error: App container is not running. Start the application first."
+        echo ""
+        show_menu
+        return
+    fi
+    
+    # Get the container ID
+    CONTAINER_ID=$($DOCKER_COMPOSE_CMD -f local-docker-compose.yml ps -q app)
+    
+    if [ -z "$CONTAINER_ID" ]; then
+        echo "Error: Could not find the app container ID."
+    else
+        echo "Entering container shell. Type 'exit' to return to this menu."
+        echo "----------------------------------------"
+        echo "TIPS: To rebuild and restart the app after making changes:"
+        echo "1. Run 'cd /app' to go to the app directory"
+        echo "2. Run 'mvn clean package -DskipTests' to rebuild"
+        echo "3. Run 'pkill -f "java -jar" && java -jar target/*.jar &' to restart"
+        echo "----------------------------------------"
+        docker exec -it $CONTAINER_ID /bin/bash || docker exec -it $CONTAINER_ID /bin/sh
+        echo "----------------------------------------"
+        echo "Returned from container shell."
+    fi
+    
+    echo ""
+    show_menu
+}
+
+# Rebuild the application inside the container
+rebuild_inside_container() {
+    echo "Rebuilding application inside container..."
+    
+    # Check if the app container is running
+    if ! $DOCKER_COMPOSE_CMD -f local-docker-compose.yml ps | grep -q "app.*Up"; then
+        echo "Error: App container is not running. Start the application first."
+        echo ""
+        show_menu
+        return
+    fi
+    
+    # Get the container ID
+    CONTAINER_ID=$($DOCKER_COMPOSE_CMD -f local-docker-compose.yml ps -q app)
+    
+    if [ -z "$CONTAINER_ID" ]; then
+        echo "Error: Could not find the app container ID."
+    else
+        echo "Rebuilding and restarting Spring Boot application inside container..."
+        
+        # Execute Maven commands inside the container to rebuild and restart
+        # First, we'll stop the running application (if any)
+        docker exec $CONTAINER_ID bash -c "pkill -f 'java -jar' || echo 'No Java process running'"
+        
+        # Then rebuild the application with Maven
+        docker exec $CONTAINER_ID bash -c "cd /app && mvn clean package -DskipTests"
+        
+        # Check if the build was successful
+        if [ $? -eq 0 ]; then
+            echo "Build successful! Starting the application..."
+            
+            # Start the application in the background
+            docker exec -d $CONTAINER_ID bash -c "cd /app && java -jar target/*.jar &"
+            
+            echo "Application restarted successfully!"
+            echo "You can access it at: http://localhost:8081"
+            echo "Swagger UI: http://localhost:8081/swagger-ui/index.html"
+        else
+            echo "Build failed. Please check the logs for errors."
+        fi
+    fi
+    
+    echo ""
+    show_menu
+}
+
 # Check if script is being run with arguments
 if [ $# -gt 0 ]; then
     case "$1" in
@@ -185,9 +273,17 @@ if [ $# -gt 0 ]; then
             rebuild_application
             exit 0
             ;;
+        shell)
+            access_container_shell
+            exit 0
+            ;;
+        rebuild-inside)
+            rebuild_inside_container
+            exit 0
+            ;;
         *)
             echo "Unknown command: $1"
-            echo "Available commands: start, stop, restart, logs, rebuild"
+            echo "Available commands: start, stop, restart, logs, rebuild, shell, rebuild-inside"
             exit 1
             ;;
     esac

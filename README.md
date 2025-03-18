@@ -12,6 +12,7 @@ Spring Boot Boilerplate is an advanced foundation designed to facilitate the dev
 
 - [Installation](#installation)
 - [Features](#features)
+- [Local Development](#local-development)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
@@ -74,6 +75,61 @@ Now, your application will be up and running. You can access it in your web brow
 8. **Swagger**: The application includes Swagger, a powerful tool for documenting and testing APIs. Swagger UI provides an interactive API documentation that makes it easy for developers to understand and use the API endpoints.
 
 These features collectively form a strong foundation for developing production-ready Spring Boot applications, saving development time and effort and ensuring best practices are followed throughout the development process.
+
+## Local Development
+
+This project supports hot reloading for a smoother development experience. Follow these steps to set up and use hot reloading:
+
+### Setting Up Hot Reloading
+
+1. **Start the Application in Development Mode**
+
+   Use the provided script to start the application with hot reloading enabled:
+   ```bash
+   ./restart-dev.sh
+   ```
+   This will build and start your Docker containers with the proper configuration for hot reloading.
+
+2. **Making Changes**
+
+   When you make changes to your Java files in the `src` directory, Spring Boot DevTools will automatically detect these changes and restart the application. You don't need to manually rebuild or restart the container.
+
+3. **Testing Hot Reloading**
+
+   - Visit http://localhost:8081/test in your browser
+   - Modify the message in `DevToolsTestController.java`
+   - Save the file
+   - Refresh your browser to see the changes
+
+### Troubleshooting Hot Reloading
+
+If automatic hot reloading isn't working, you can use the `rebuild-app.sh` script:
+
+```bash
+./rebuild-app.sh
+```
+
+This script offers two options:
+1. **Full rebuild and restart** - Completely rebuilds and restarts the application
+2. **Trigger DevTools restart** - Triggers a quick restart without a full rebuild
+
+### Accessing the Container
+
+To access the container shell for debugging or running commands:
+
+```bash
+./start-app.sh shell
+```
+
+Inside the container, you can:
+- Run Maven commands: `mvn clean compile`
+- Restart the application: `pkill -f 'spring-boot:run' && mvn spring-boot:run`
+
+### Important URLs
+
+- **Application**: http://localhost:8081
+- **Swagger UI**: http://localhost:8081/swagger-ui/index.html
+- **Database Admin (Adminer)**: http://localhost:8082
 
 ## Documentation
 - Swagger UI:

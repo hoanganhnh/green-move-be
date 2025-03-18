@@ -11,7 +11,7 @@ public class HealthController {
 	@GetMapping("/health")
 	public ResponseEntity<String> sayHello() {
 
-		return ResponseEntity.ok("Working Hot as Chili Sauce - developed by Rimmel");
+		return ResponseEntity.ok("Health Check!!!");
 	}
 
 }
