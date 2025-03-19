@@ -14,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User Management", description = "API for managing users")
 public class UserController {
 
     private final UserService userService;
