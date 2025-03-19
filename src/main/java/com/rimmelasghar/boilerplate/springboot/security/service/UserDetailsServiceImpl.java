@@ -1,6 +1,6 @@
 package com.rimmelasghar.boilerplate.springboot.security.service;
 
-import com.rimmelasghar.boilerplate.springboot.model.UserRole;
+import com.rimmelasghar.boilerplate.springboot.model.Role;
 import com.rimmelasghar.boilerplate.springboot.security.dto.AuthenticatedUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +20,24 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-	private static final String USERNAME_OR_PASSWORD_INVALID = "Invalid username or password.";
+	private static final String EMAIL_OR_PASSWORD_INVALID = "Invalid email or password.";
 
-	private final UserService userService;
+	private final AuthUserService userService;
 
 	@Override
-	public UserDetails loadUserByUsername(String username) {
+	public UserDetails loadUserByUsername(String email) {
 
-		final AuthenticatedUserDto authenticatedUser = userService.findAuthenticatedUserByUsername(username);
+		final AuthenticatedUserDto authenticatedUser = userService.findAuthenticatedUserByEmail(email);
 
 		if (Objects.isNull(authenticatedUser)) {
-			throw new UsernameNotFoundException(USERNAME_OR_PASSWORD_INVALID);
+			throw new UsernameNotFoundException(EMAIL_OR_PASSWORD_INVALID);
 		}
 
-		final String authenticatedUsername = authenticatedUser.getUsername();
+		final String authenticatedEmail = authenticatedUser.getEmail();
 		final String authenticatedPassword = authenticatedUser.getPassword();
-		final UserRole userRole = authenticatedUser.getUserRole();
-		final SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(userRole.name());
+		final Role role = authenticatedUser.getRole();
+		final SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(role.getRoleName());
 
-		return new User(authenticatedUsername, authenticatedPassword, Collections.singletonList(grantedAuthority));
+		return new User(authenticatedEmail, authenticatedPassword, Collections.singletonList(grantedAuthority));
 	}
 }

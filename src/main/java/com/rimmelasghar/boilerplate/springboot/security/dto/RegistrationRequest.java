@@ -22,9 +22,9 @@ public class RegistrationRequest {
 	@NotEmpty(message = "{registration_email_not_empty}")
 	private String email;
 
-	@Schema(description = "User's username", example = "username", required = true)
-	@NotEmpty(message = "{registration_username_not_empty}")
-	private String username;
+	@Schema(description = "User's full name", example = "John Doe", required = true)
+	@NotEmpty(message = "{registration_fullname_not_empty}")
+	private String fullName;
 
 	@Schema(description = "User's password", example = "password123", required = true)
 	@NotEmpty(message = "{registration_password_not_empty}")

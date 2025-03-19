@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.rimmelasghar.boilerplate.springboot.model.User;
-import com.rimmelasghar.boilerplate.springboot.model.UserRole;
+import com.rimmelasghar.boilerplate.springboot.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +20,14 @@ public class JwtTokenManager {
 
 	public String generateToken(User user) {
 
-		final String username = user.getUsername();
-		final UserRole userRole = user.getUserRole();
+		final String email = user.getEmail();
+		final Role role = user.getRole();
 
 		//@formatter:off
 		return JWT.create()
-				.withSubject(username)
+				.withSubject(email)
 				.withIssuer(jwtProperties.getIssuer())
-				.withClaim("role", userRole.name())
+				.withClaim("role", role.getRoleName())
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationMinute() * 60 * 1000))
 				.sign(Algorithm.HMAC256(jwtProperties.getSecretKey().getBytes()));

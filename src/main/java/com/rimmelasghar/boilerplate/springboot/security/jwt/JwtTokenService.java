@@ -1,7 +1,7 @@
 package com.rimmelasghar.boilerplate.springboot.security.jwt;
 
 import com.rimmelasghar.boilerplate.springboot.security.mapper.UserMapper;
-import com.rimmelasghar.boilerplate.springboot.security.service.UserService;
+import com.rimmelasghar.boilerplate.springboot.security.service.AuthUserService;
 import com.rimmelasghar.boilerplate.springboot.model.User;
 import com.rimmelasghar.boilerplate.springboot.security.dto.AuthenticatedUserDto;
 import com.rimmelasghar.boilerplate.springboot.security.dto.LoginRequest;
@@ -12,13 +12,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-// rimmel asghar
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtTokenService {
 
-	private final UserService userService;
+	private final AuthUserService userService;
 
 	private final JwtTokenManager jwtTokenManager;
 
@@ -26,19 +25,19 @@ public class JwtTokenService {
 
 	public LoginResponse getLoginResponse(LoginRequest loginRequest) {
 
-		final String username = loginRequest.getUsername();
+		final String email = loginRequest.getEmail();
 		final String password = loginRequest.getPassword();
 
-		final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+		final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(email, password);
 
 		authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-		final AuthenticatedUserDto authenticatedUserDto = userService.findAuthenticatedUserByUsername(username);
+		final AuthenticatedUserDto authenticatedUserDto = userService.findAuthenticatedUserByEmail(email);
 
 		final User user = UserMapper.INSTANCE.convertToUser(authenticatedUserDto);
 		final String token = jwtTokenManager.generateToken(user);
 
-		log.info("{} has successfully logged in!", user.getUsername());
+		log.info("{} has successfully logged in!", user.getEmail());
 
 		return new LoginResponse(token);
 	}

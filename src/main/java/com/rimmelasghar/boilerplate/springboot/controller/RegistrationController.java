@@ -2,7 +2,7 @@ package com.rimmelasghar.boilerplate.springboot.controller;
 
 import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationRequest;
 import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationResponse;
-import com.rimmelasghar.boilerplate.springboot.security.service.UserService;
+import com.rimmelasghar.boilerplate.springboot.security.service.AuthUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +24,7 @@ import javax.validation.Valid;
 @Tag(name = "Registration", description = "Registration API")
 public class RegistrationController {
 
-	private final UserService userService;
+	private final AuthUserService userService;
 
 	@Operation(summary = "Register a new user", description = "Creates a new user account with username, email, and password")
 	@ApiResponses(value = {

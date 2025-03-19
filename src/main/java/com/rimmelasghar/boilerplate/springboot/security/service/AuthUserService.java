@@ -6,12 +6,12 @@ import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationRequest;
 import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationResponse;
 
 // rimmel asghar
-public interface UserService {
+public interface AuthUserService {
 
-	User findByUsername(String username);
+	User findByEmail(String email);
 
 	RegistrationResponse registration(RegistrationRequest registrationRequest);
 
-	AuthenticatedUserDto findAuthenticatedUserByUsername(String username);
+	AuthenticatedUserDto findAuthenticatedUserByEmail(String email);
 
 }

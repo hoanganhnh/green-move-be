@@ -1,8 +1,9 @@
 package com.rimmelasghar.boilerplate.springboot.security.service;
 
 import com.rimmelasghar.boilerplate.springboot.service.UserValidationService;
+import com.rimmelasghar.boilerplate.springboot.service.RoleService;
 import com.rimmelasghar.boilerplate.springboot.model.User;
-import com.rimmelasghar.boilerplate.springboot.model.UserRole;
+import com.rimmelasghar.boilerplate.springboot.model.Role;
 import com.rimmelasghar.boilerplate.springboot.security.dto.AuthenticatedUserDto;
 import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationRequest;
 import com.rimmelasghar.boilerplate.springboot.security.dto.RegistrationResponse;
@@ -14,11 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-// rimmel asghar
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class AuthUserServiceImpl implements AuthUserService {
 
 	private static final String REGISTRATION_SUCCESSFUL = "registration_successful";
 
@@ -29,11 +31,13 @@ public class UserServiceImpl implements UserService {
 	private final UserValidationService userValidationService;
 
 	private final GeneralMessageAccessor generalMessageAccessor;
+	
+	private final RoleService roleService;
 
 	@Override
-	public User findByUsername(String username) {
+	public User findByEmail(String email) {
 
-		return userRepository.findByUsername(username);
+		return userRepository.findByEmail(email).orElse(null);
 	}
 
 	@Override
@@ -43,22 +47,31 @@ public class UserServiceImpl implements UserService {
 
 		final User user = UserMapper.INSTANCE.convertToUser(registrationRequest);
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		user.setUserRole(UserRole.USER);
+		
+		// Set default role to USER
+		Optional<Role> userRole = roleService.getRoleByName("USER");
+		if (userRole.isEmpty()) {
+			// Create USER role if it doesn't exist
+			Role newRole = new Role("USER");
+			user.setRole(roleService.saveRole(newRole));
+		} else {
+			user.setRole(userRole.get());
+		}
 
 		userRepository.save(user);
 
-		final String username = registrationRequest.getUsername();
-		final String registrationSuccessMessage = generalMessageAccessor.getMessage(null, REGISTRATION_SUCCESSFUL, username);
+		final String email = registrationRequest.getEmail();
+		final String registrationSuccessMessage = generalMessageAccessor.getMessage(null, REGISTRATION_SUCCESSFUL, email);
 
-		log.info("{} registered successfully!", username);
+		log.info("{} registered successfully!", email);
 
 		return new RegistrationResponse(registrationSuccessMessage);
 	}
 
 	@Override
-	public AuthenticatedUserDto findAuthenticatedUserByUsername(String username) {
+	public AuthenticatedUserDto findAuthenticatedUserByEmail(String email) {
 
-		final User user = findByUsername(username);
+		final User user = findByEmail(email);
 
 		return UserMapper.INSTANCE.convertToAuthenticatedUserDto(user);
 	}
