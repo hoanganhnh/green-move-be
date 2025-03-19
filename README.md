@@ -74,6 +74,8 @@ Now, your application will be up and running. You can access it in your web brow
 
 8. **Swagger**: The application includes Swagger, a powerful tool for documenting and testing APIs. Swagger UI provides an interactive API documentation that makes it easy for developers to understand and use the API endpoints.
 
+9. **Vehicle and Location Management**: The application includes a comprehensive API for managing vehicles and locations, with full CRUD operations for both resources.
+
 These features collectively form a strong foundation for developing production-ready Spring Boot applications, saving development time and effort and ensuring best practices are followed throughout the development process.
 
 ## Local Development
@@ -136,6 +138,32 @@ Inside the container, you can:
   ![](https://github.com/rimmelasghar/SpringBoot-boilerPlate/blob/main/imgs/swagger-1.jpg)
 - Get Request:
   ![](https://github.com/rimmelasghar/SpringBoot-boilerPlate/blob/main/imgs/swagger-2.jpg)
+
+## API Endpoints
+
+### Vehicles API
+
+- **Create Vehicle**: `POST /vehicles`
+  - Request Body: `{ "name": "Model S", "brand": "Tesla", "type": "Electric", "license_plate": "ABC123", "status": "Available", "location_id": 1, "price_per_day": 100 }`
+
+- **Get Vehicle**: `GET /vehicles/{vehicle_id}`
+
+- **Update Vehicle**: `PUT /vehicles/{vehicle_id}`
+  - Request Body: `{ "status": "Rented" }`
+
+- **Delete Vehicle**: `DELETE /vehicles/{vehicle_id}`
+
+### Locations API
+
+- **Create Location**: `POST /locations`
+  - Request Body: `{ "name": "Downtown", "address": "123 Main St" }`
+
+- **Get Location**: `GET /locations/{location_id}`
+
+- **Update Location**: `PUT /locations/{location_id}`
+  - Request Body: `{ "name": "Uptown", "address": "456 Elm St" }`
+
+- **Delete Location**: `DELETE /locations/{location_id}`
   
   
 ## Contributing

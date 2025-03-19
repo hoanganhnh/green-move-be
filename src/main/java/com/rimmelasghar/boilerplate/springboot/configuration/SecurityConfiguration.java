@@ -40,6 +40,8 @@ public class SecurityConfiguration {
 				.antMatchers("/register","/health","/login","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
 				.antMatchers("/roles/**").permitAll() // Temporarily allow access to roles API for testing
 				.antMatchers("/test/**").permitAll() // Temporarily allow access to test endpoints
+				.antMatchers("/vehicles/**").permitAll() // Temporarily allow access to vehicles API for testing
+				.antMatchers("/locations/**").permitAll() // Temporarily allow access to locations API for testing
 				.anyRequest().authenticated().and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
