@@ -42,6 +42,7 @@ public class SecurityConfiguration {
 				.antMatchers("/test/**").permitAll() // Temporarily allow access to test endpoints
 				.antMatchers("/vehicles/**").permitAll() // Temporarily allow access to vehicles API for testing
 				.antMatchers("/locations/**").permitAll() // Temporarily allow access to locations API for testing
+				.antMatchers("/rentals/**").permitAll() // Temporarily allow access to rentals API for testing
 				.anyRequest().authenticated().and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
