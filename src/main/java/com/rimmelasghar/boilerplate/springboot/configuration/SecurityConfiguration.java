@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +25,8 @@ public class SecurityConfiguration {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	private final JwtAuthenticationEntryPoint unauthorizedHandler;
+	
+	private final CorsFilter corsFilter;
 
 	@Bean
 	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -34,7 +38,8 @@ public class SecurityConfiguration {
 
 		//@formatter:off
 
-		return http.cors().and().csrf().disable()
+		return http.csrf().disable()
+				.addFilterBefore(corsFilter, ChannelProcessingFilter.class)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 				.antMatchers("/register","/health","/login","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
