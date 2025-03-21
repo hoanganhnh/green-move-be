@@ -1,5 +1,7 @@
 package com.rimmelasghar.boilerplate.springboot.security.jwt;
 
+import com.rimmelasghar.boilerplate.springboot.dto.UserProfileDto;
+import com.rimmelasghar.boilerplate.springboot.mapper.UserProfileMapper;
 import com.rimmelasghar.boilerplate.springboot.security.mapper.UserMapper;
 import com.rimmelasghar.boilerplate.springboot.security.service.AuthUserService;
 import com.rimmelasghar.boilerplate.springboot.model.User;
@@ -32,14 +34,19 @@ public class JwtTokenService {
 
 		authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-		final AuthenticatedUserDto authenticatedUserDto = userService.findAuthenticatedUserByEmail(email);
-
-		final User user = UserMapper.INSTANCE.convertToUser(authenticatedUserDto);
+		// Get the user directly from the database
+		final User user = userService.findByEmail(email);
 		final String token = jwtTokenManager.generateToken(user);
+
+		// Convert user to UserProfileDto
+		final UserProfileDto userProfileDto = UserProfileMapper.toUserProfileDto(user);
 
 		log.info("{} has successfully logged in!", user.getEmail());
 
-		return new LoginResponse(token);
+		return LoginResponse.builder()
+			.token(token)
+			.user(userProfileDto)
+			.build();
 	}
 
 }

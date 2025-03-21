@@ -11,9 +11,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AuthenticatedUserDto {
 
+	private Long id;
+	
 	private String email;
 
 	private String password;
+	
+	private String fullName;
+	
+	private String phoneNumber;
 
 	private Role role;
 

@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 
 // rimmel asghar
 @Getter
@@ -29,5 +30,9 @@ public class RegistrationRequest {
 	@Schema(description = "User's password", example = "password123", required = true)
 	@NotEmpty(message = "{registration_password_not_empty}")
 	private String password;
+	
+	@Schema(description = "User's phone number", example = "+1234567890")
+	@Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number must be valid")
+	private String phoneNumber;
 
 }
