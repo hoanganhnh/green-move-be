@@ -45,4 +45,7 @@ public class Vehicle {
     
     @Column(name = "price_per_year", nullable = true)
     private BigDecimal pricePerYear;
+
+    @Column(nullable = false)
+    private String image;
 }

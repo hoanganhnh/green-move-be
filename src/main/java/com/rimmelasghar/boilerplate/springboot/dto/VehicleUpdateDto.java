@@ -29,4 +29,6 @@ public class VehicleUpdateDto {
     
     @DecimalMin(value = "0.0", inclusive = false, message = "Price per year must be greater than 0")
     private BigDecimal price_per_year;
+    
+    private String image;
 }

@@ -19,6 +19,7 @@ public abstract class VehicleMapper {
     @Mapping(source = "price_per_day", target = "pricePerDay")
     @Mapping(source = "price_per_month", target = "pricePerMonth")
     @Mapping(source = "price_per_year", target = "pricePerYear")
+    @Mapping(source = "image", target = "image")
     public abstract Vehicle toVehicle(VehicleDto vehicleDto);
 
     @Mapping(source = "licensePlate", target = "license_plate")
@@ -26,6 +27,7 @@ public abstract class VehicleMapper {
     @Mapping(source = "pricePerDay", target = "price_per_day")
     @Mapping(source = "pricePerMonth", target = "price_per_month")
     @Mapping(source = "pricePerYear", target = "price_per_year")
+    @Mapping(source = "image", target = "image")
     public abstract VehicleDto toVehicleDto(Vehicle vehicle);
 
     @Mapping(source = "license_plate", target = "licensePlate")
@@ -33,6 +35,7 @@ public abstract class VehicleMapper {
     @Mapping(source = "price_per_day", target = "pricePerDay")
     @Mapping(source = "price_per_month", target = "pricePerMonth")
     @Mapping(source = "price_per_year", target = "pricePerYear")
+    @Mapping(source = "image", target = "image")
     public abstract void updateVehicleFromDto(VehicleUpdateDto vehicleUpdateDto, @MappingTarget Vehicle vehicle);
     
     protected Location getLocationById(Long id) {
