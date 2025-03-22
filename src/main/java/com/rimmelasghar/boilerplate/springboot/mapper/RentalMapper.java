@@ -28,6 +28,7 @@ public abstract class RentalMapper {
     @Mapping(source = "end_time", target = "endTime")
     @Mapping(source = "total_price", target = "totalPrice")
     @Mapping(source = "created_at", target = "createdAt", defaultExpression = "java(java.time.LocalDateTime.now())")
+    @Mapping(source = "pickup_location", target = "pickupLocation")
     public abstract Rental toRental(RentalDto rentalDto);
 
     @Mapping(source = "user.id", target = "user_id")
@@ -36,6 +37,7 @@ public abstract class RentalMapper {
     @Mapping(source = "endTime", target = "end_time")
     @Mapping(source = "totalPrice", target = "total_price")
     @Mapping(source = "createdAt", target = "created_at")
+    @Mapping(source = "pickupLocation", target = "pickup_location")
     public abstract RentalDto toRentalDto(Rental rental);
 
     @Mapping(target = "user", expression = "java(rentalUpdateDto.getUser_id() != null ? getUserById(rentalUpdateDto.getUser_id()) : rental.getUser())")
@@ -43,6 +45,7 @@ public abstract class RentalMapper {
     @Mapping(source = "start_time", target = "startTime")
     @Mapping(source = "end_time", target = "endTime")
     @Mapping(source = "total_price", target = "totalPrice")
+    @Mapping(source = "pickup_location", target = "pickupLocation")
     public abstract void updateRentalFromDto(RentalUpdateDto rentalUpdateDto, @MappingTarget Rental rental);
 
     protected User getUserById(Long id) {

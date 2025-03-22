@@ -38,4 +38,6 @@ public class RentalDto {
     private String status;
 
     private LocalDateTime created_at;
+    
+    private String pickup_location;
 }

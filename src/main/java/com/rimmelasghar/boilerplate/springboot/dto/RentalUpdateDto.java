@@ -24,4 +24,6 @@ public class RentalUpdateDto {
     private BigDecimal total_price;
     
     private String status;
+    
+    private String pickup_location;
 }

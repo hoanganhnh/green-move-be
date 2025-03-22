@@ -41,4 +41,7 @@ public class Rental {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    
+    @Column(name = "pickup_location", nullable = true, columnDefinition = "LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String pickupLocation;
 }
