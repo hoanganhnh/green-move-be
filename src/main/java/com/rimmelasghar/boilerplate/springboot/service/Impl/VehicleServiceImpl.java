@@ -11,6 +11,9 @@ import com.rimmelasghar.boilerplate.springboot.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class VehicleServiceImpl implements VehicleService {
@@ -75,5 +78,16 @@ public class VehicleServiceImpl implements VehicleService {
         
         // Delete vehicle
         vehicleRepository.deleteById(id);
+    }
+    
+    @Override
+    public List<VehicleDto> getAllVehicles() {
+        // Retrieve all vehicles from the repository
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+        
+        // Convert all vehicle entities to DTOs and return as a list
+        return vehicles.stream()
+                .map(vehicleMapper::toVehicleDto)
+                .collect(Collectors.toList());
     }
 }

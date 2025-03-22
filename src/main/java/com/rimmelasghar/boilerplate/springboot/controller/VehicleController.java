@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 @RestController
@@ -74,5 +76,16 @@ public class VehicleController {
     public ResponseEntity<Void> deleteVehicle(@PathVariable("vehicle_id") Long vehicleId) {
         vehicleService.deleteVehicle(vehicleId);
         return ResponseEntity.noContent().build();
+    }
+    
+    @Operation(summary = "Get all vehicles", description = "Returns a list of all vehicles")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved all vehicles",
+            content = @Content(schema = @Schema(implementation = VehicleDto.class)))
+    })
+    @GetMapping
+    public ResponseEntity<List<VehicleDto>> getAllVehicles() {
+        List<VehicleDto> vehicles = vehicleService.getAllVehicles();
+        return ResponseEntity.ok(vehicles);
     }
 }
