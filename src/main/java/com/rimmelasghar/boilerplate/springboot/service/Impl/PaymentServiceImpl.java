@@ -8,9 +8,13 @@ import com.rimmelasghar.boilerplate.springboot.model.Payment;
 import com.rimmelasghar.boilerplate.springboot.repository.PaymentRepository;
 import com.rimmelasghar.boilerplate.springboot.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,6 +79,58 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public List<PaymentDto> getPaymentsByStatus(String status) {
         return paymentRepository.findByStatus(status).stream()
+                .map(paymentMapper::toPaymentDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<PaymentDto> getPaymentsWithFilters(Long userId, Long rentalId, String status,
+                                                 String paymentMethod, BigDecimal minAmount, BigDecimal maxAmount,
+                                                 LocalDateTime paymentDateFrom, LocalDateTime paymentDateTo) {
+        
+        Specification<Payment> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // Filter by userId if provided
+            if (userId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            }
+            
+            // Filter by rentalId if provided
+            if (rentalId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("rental").get("id"), rentalId));
+            }
+            
+            // Filter by status if provided
+            if (status != null && !status.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+            
+            // Filter by paymentMethod if provided
+            if (paymentMethod != null && !paymentMethod.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("paymentMethod"), paymentMethod));
+            }
+            
+            // Filter by amount range if provided
+            if (minAmount != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("amount"), minAmount));
+            }
+            if (maxAmount != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("amount"), maxAmount));
+            }
+            
+            // Filter by paymentDate range if provided
+            if (paymentDateFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("paymentDate"), paymentDateFrom));
+            }
+            if (paymentDateTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("paymentDate"), paymentDateTo));
+            }
+            
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        return paymentRepository.findAll(specification).stream()
                 .map(paymentMapper::toPaymentDto)
                 .collect(Collectors.toList());
     }

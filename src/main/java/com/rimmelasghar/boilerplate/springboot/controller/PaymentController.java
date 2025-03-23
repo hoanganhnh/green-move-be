@@ -10,9 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -50,14 +54,35 @@ public class PaymentController {
         return ResponseEntity.ok(paymentDto);
     }
 
-    @Operation(summary = "Get all payments", description = "Returns a list of all payments")
+    @Operation(summary = "Get all payments", description = "Returns a list of all payments with optional filtering")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List of payments retrieved successfully")
     })
     @GetMapping
-    public ResponseEntity<List<PaymentDto>> getAllPayments() {
-        List<PaymentDto> payments = paymentService.getAllPayments();
-        return ResponseEntity.ok(payments);
+    public ResponseEntity<List<PaymentDto>> getAllPayments(
+            @RequestParam(required = false) Long user_id,
+            @RequestParam(required = false) Long rental_id,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String payment_method,
+            @RequestParam(required = false) BigDecimal min_amount,
+            @RequestParam(required = false) BigDecimal max_amount,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime payment_date_from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime payment_date_to) {
+        
+        // If no filters are provided, return all payments
+        if (user_id == null && rental_id == null && status == null && payment_method == null && 
+            min_amount == null && max_amount == null && 
+            payment_date_from == null && payment_date_to == null) {
+            List<PaymentDto> payments = paymentService.getAllPayments();
+            return ResponseEntity.ok(payments);
+        }
+        
+        // Otherwise, apply filters
+        List<PaymentDto> filteredPayments = paymentService.getPaymentsWithFilters(
+                user_id, rental_id, status, payment_method, 
+                min_amount, max_amount, 
+                payment_date_from, payment_date_to);
+        return ResponseEntity.ok(filteredPayments);
     }
 
     @Operation(summary = "Get payments by user ID", description = "Returns a list of payments for the specified user")
