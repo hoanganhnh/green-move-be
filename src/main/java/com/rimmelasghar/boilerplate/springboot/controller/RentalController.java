@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -50,14 +52,34 @@ public class RentalController {
         return ResponseEntity.ok(rentalDto);
     }
 
-    @Operation(summary = "Get all rentals", description = "Returns a list of all rentals")
+    @Operation(summary = "Get all rentals", description = "Returns a list of all rentals with optional filtering")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List of rentals retrieved successfully")
     })
     @GetMapping
-    public ResponseEntity<List<RentalDto>> getAllRentals() {
-        List<RentalDto> rentals = rentalService.getAllRentals();
-        return ResponseEntity.ok(rentals);
+    public ResponseEntity<List<RentalDto>> getAllRentals(
+            @RequestParam(required = false) Long user_id,
+            @RequestParam(required = false) Long vehicle_id,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start_time_from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start_time_to,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end_time_from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end_time_to) {
+        
+        // If no filters are provided, return all rentals
+        if (user_id == null && vehicle_id == null && status == null && 
+            start_time_from == null && start_time_to == null && 
+            end_time_from == null && end_time_to == null) {
+            List<RentalDto> rentals = rentalService.getAllRentals();
+            return ResponseEntity.ok(rentals);
+        }
+        
+        // Otherwise, apply filters
+        List<RentalDto> filteredRentals = rentalService.getRentalsWithFilters(
+                user_id, vehicle_id, status, 
+                start_time_from, start_time_to, 
+                end_time_from, end_time_to);
+        return ResponseEntity.ok(filteredRentals);
     }
 
     @Operation(summary = "Update rental", description = "Updates an existing rental with the provided details")

@@ -8,9 +8,12 @@ import com.rimmelasghar.boilerplate.springboot.model.Rental;
 import com.rimmelasghar.boilerplate.springboot.repository.RentalRepository;
 import com.rimmelasghar.boilerplate.springboot.service.RentalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,53 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public List<RentalDto> getAllRentals() {
         return rentalRepository.findAll().stream()
+                .map(rentalMapper::toRentalDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<RentalDto> getRentalsWithFilters(Long userId, Long vehicleId, String status,
+                                               LocalDateTime startTimeFrom, LocalDateTime startTimeTo,
+                                               LocalDateTime endTimeFrom, LocalDateTime endTimeTo) {
+        
+        Specification<Rental> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // Filter by userId if provided
+            if (userId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            }
+            
+            // Filter by vehicleId if provided
+            if (vehicleId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("vehicle").get("id"), vehicleId));
+            }
+            
+            // Filter by status if provided
+            if (status != null && !status.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+            
+            // Filter by startTime range if provided
+            if (startTimeFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startTimeFrom));
+            }
+            if (startTimeTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startTime"), startTimeTo));
+            }
+            
+            // Filter by endTime range if provided
+            if (endTimeFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endTime"), endTimeFrom));
+            }
+            if (endTimeTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endTimeTo));
+            }
+            
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        return rentalRepository.findAll(specification).stream()
                 .map(rentalMapper::toRentalDto)
                 .collect(Collectors.toList());
     }
