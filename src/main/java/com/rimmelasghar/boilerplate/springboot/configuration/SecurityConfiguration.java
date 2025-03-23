@@ -50,6 +50,7 @@ public class SecurityConfiguration {
 				.antMatchers("/rentals/**").permitAll() // Temporarily allow access to rentals API for testing
 				.antMatchers("/reviews/**").permitAll() // Temporarily allow access to reviews API for testing
 				.antMatchers("/payments/**").permitAll() // Temporarily allow access to payments API for testing
+				.antMatchers("/users/**").permitAll() // Allow access to users API without authentication
 				.anyRequest().authenticated().and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -166,6 +166,16 @@ public class UserController {
             error.put("error", "Email already exists");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
+        
+        // Check if phone number is being updated and already exists
+        if (userUpdateDto.getPhone_number() != null && 
+            !userUpdateDto.getPhone_number().equals(existingUser.getPhoneNumber()) && 
+            userService.existsByPhoneNumber(userUpdateDto.getPhone_number())) {
+            
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Phone number already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
 
         // Update user fields
         if (userUpdateDto.getFull_name() != null) {
@@ -174,6 +184,21 @@ public class UserController {
         
         if (userUpdateDto.getEmail() != null) {
             existingUser.setEmail(userUpdateDto.getEmail());
+        }
+        
+        if (userUpdateDto.getPhone_number() != null) {
+            existingUser.setPhoneNumber(userUpdateDto.getPhone_number());
+        }
+        
+        // Update role if provided
+        if (userUpdateDto.getRole_id() != null) {
+            Optional<Role> roleOptional = roleService.getRoleById(userUpdateDto.getRole_id());
+            if (roleOptional.isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Role not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+            existingUser.setRole(roleOptional.get());
         }
 
         // Save updated user
