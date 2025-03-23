@@ -8,9 +8,12 @@ import com.rimmelasghar.boilerplate.springboot.model.Review;
 import com.rimmelasghar.boilerplate.springboot.repository.ReviewRepository;
 import com.rimmelasghar.boilerplate.springboot.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,5 +95,48 @@ public class ReviewServiceImpl implements ReviewService {
         
         // Delete review
         reviewRepository.deleteById(id);
+    }
+    
+    @Override
+    public List<ReviewDto> getReviewsWithFilters(Long userId, Long rentalId, Integer minRating, Integer maxRating,
+                                               LocalDateTime createdAtFrom, LocalDateTime createdAtTo) {
+        Specification<Review> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // Filter by user_id if provided
+            if (userId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("user").get("id"), userId));
+            }
+            
+            // Filter by rental_id if provided
+            if (rentalId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("rental").get("id"), rentalId));
+            }
+            
+            // Filter by minimum rating if provided
+            if (minRating != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), minRating));
+            }
+            
+            // Filter by maximum rating if provided
+            if (maxRating != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("rating"), maxRating));
+            }
+            
+            // Filter by created_at date range if provided
+            if (createdAtFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), createdAtFrom));
+            }
+            
+            if (createdAtTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), createdAtTo));
+            }
+            
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        return reviewRepository.findAll(specification).stream()
+                .map(reviewMapper::toReviewDto)
+                .collect(Collectors.toList());
     }
 }

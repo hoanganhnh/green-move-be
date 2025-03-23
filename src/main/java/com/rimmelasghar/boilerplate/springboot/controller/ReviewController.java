@@ -10,9 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -50,14 +53,30 @@ public class ReviewController {
         return ResponseEntity.ok(reviewDto);
     }
 
-    @Operation(summary = "Get all reviews", description = "Returns a list of all reviews")
+    @Operation(summary = "Get all reviews", description = "Returns a list of all reviews with optional filtering")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully")
     })
     @GetMapping
-    public ResponseEntity<List<ReviewDto>> getAllReviews() {
-        List<ReviewDto> reviews = reviewService.getAllReviews();
-        return ResponseEntity.ok(reviews);
+    public ResponseEntity<List<ReviewDto>> getAllReviews(
+            @RequestParam(required = false) Long user_id,
+            @RequestParam(required = false) Long rental_id,
+            @RequestParam(required = false) Integer min_rating,
+            @RequestParam(required = false) Integer max_rating,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime created_at_from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime created_at_to) {
+        
+        // If no filters are provided, return all reviews
+        if (user_id == null && rental_id == null && min_rating == null && max_rating == null && 
+            created_at_from == null && created_at_to == null) {
+            List<ReviewDto> reviews = reviewService.getAllReviews();
+            return ResponseEntity.ok(reviews);
+        }
+        
+        // Otherwise, apply filters
+        List<ReviewDto> filteredReviews = reviewService.getReviewsWithFilters(
+                user_id, rental_id, min_rating, max_rating, created_at_from, created_at_to);
+        return ResponseEntity.ok(filteredReviews);
     }
 
     @Operation(summary = "Get reviews by user ID", description = "Returns a list of reviews for the specified user")
